@@ -1,9 +1,10 @@
-﻿{
+{
   "id": "command-palette-manager",
   "name": "Command Palette Manager",
   "version": "1.2.0",
   "minAppVersion": "1.7.0",
   "description": "Visual command palette manager: add multiple aliases to any plugin command, rename & revert, hide commands, group by action, pin UI buttons, build macros, and launch with Raycast-style fuzzy search.",
-  "author": "Mostakim2005",`n`t"authorUrl": "https://github.com/Mostakim2005",
+  "author": "Mostakim2005",
+  "authorUrl": "https://github.com/Mostakim2005",
   "isDesktopOnly": false
 }
