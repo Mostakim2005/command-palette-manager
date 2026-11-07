@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command Palette Manager — Visual Guide</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  </script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+    h1 { font-size: 1.75rem; color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-top: 4px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab-btn {
+      background: var(--surface); color: var(--text); border: 1px solid var(--border);
+      padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem;
+    }
+    .tab-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 20px; margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px; flex-wrap: wrap; gap: 8px;
+    }
+    .card-title { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .badge { font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; font-weight: 600; }
+    .badge-human { background: rgba(56, 189, 248, 0.2); color: var(--accent); }
+    .badge-agent { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .badge-trap { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .summary {
+      color: var(--accent); font-weight: 500; margin-bottom: 12px; padding-left: 10px;
+      border-left: 3px solid var(--accent);
+    }
+    .anchor {
+      font-family: monospace; font-size: 0.85rem; background: #090d16; padding: 6px 10px;
+      border-radius: 6px; color: var(--muted); margin-top: 10px; display: inline-block;
+    }
+    .mermaid-box {
+      background: #090d16; border: 1px solid var(--border); border-radius: 8px;
+      padding: 16px; margin-top: 12px; overflow-x: auto;
+    }
+    ul { margin: 8px 0 0 20px; }
+    li { margin-bottom: 4px; }
+    code { font-family: monospace; font-size: 0.85rem; color: var(--warn); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Command Palette Manager — Visual Guide</h1>
+    <p class="subtitle">Plain-English visual map of user intent, system architecture, decisions, and landmines. Generated from <code>docs/PRODUCT.md</code>, <code>docs/ARCHITECTURE.md</code> and <code>docs/DECISIONS_AND_TRAPS.md</code>.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('intent', this)">1. My Intent &amp; Features</button>
+    <button class="tab-btn" onclick="showTab('arch', this)">2. Visual Architecture</button>
+    <button class="tab-btn" onclick="showTab('decisions', this)">3. Decisions &amp; What Failed</button>
+    <button class="tab-btn" onclick="showTab('traps', this)">4. Landmines (Do Not Touch)</button>
+  </div>
+
+  <section id="intent" class="tab-panel active">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Non-Destructive-Command-Snapshot]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Records every command's factory name and icon once, so any rename or hide can be undone in a single click.</div>
+      <p><strong>User Intention:</strong> Reverting must restore the exact original name and visibility without a vault restart, and must survive plugin reloads.</p>
+      <div class="anchor">Code Anchor: src/registry.ts &rarr; CommandRegistryService.revertCommand / scanAndSyncAll</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Multi-Alias-Engine]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Registers extra search words for any command as real Obsidian commands, with four selectable prefix styles.</div>
+      <p><strong>User Intention:</strong> An alias must work from the native palette, the slash menu, and any launcher; editor-only commands must stay hidden when no editor is open.</p>
+      <div class="anchor">Code Anchor: src/registry.ts &rarr; CommandRegistryService.registerAliasProxyCommand / syncAliases</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Safe-Command-Hiding]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Removes commands from palettes while keeping hotkeys and programmatic execution working.</div>
+      <p><strong>User Intention:</strong> Hiding is a view concern, never a deletion. A hidden command must still run from its hotkey, a macro, a pinned button, or another plugin.</p>
+      <div class="anchor">Code Anchor: src/registry.ts &rarr; CommandRegistryService.installCommandInterceptors / hiddenBackup</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Raycast-Fuzzy-Quick-Palette]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: A scored fuzzy launcher with match highlighting, keyboard navigation, starring, and prefix filters.</div>
+      <p><strong>User Intention:</strong> Two or three letters should surface the intended command; <code>@group</code>, <code>#plugin</code>, <code>!macro</code> and <code>*pinned</code> must narrow results predictably.</p>
+      <div class="anchor">Code Anchor: src/quick-palette.ts &rarr; QuickCommandPaletteModal.renderResults</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Command-Usage-Analytics]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Counts executions and remembers recent commands to rank the quick palette by real usage.</div>
+      <p><strong>User Intention:</strong> Ranking reflects what the user actually runs, and the write cost never thrashes the disk.</p>
+      <div class="anchor">Code Anchor: src/registry.ts &rarr; CommandRegistryService.recordCommandUsage</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Macro-Sequencer]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Chains commands, inserted text, notices, clipboard writes, and URIs with per-step delays and variable expansion.</div>
+      <p><strong>User Intention:</strong> Macros never freeze Obsidian (delays are awaited), refuse recursive self-runs, and block unsafe URI schemes.</p>
+      <div class="anchor">Code Anchor: src/macro-engine.ts &rarr; MacroEngine.runMacro; src/macro-variables.ts &rarr; expandMacroVariables</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: UI-Button-Injector]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Pins any command or macro into five UI locations with icon, label, color, and device targeting.</div>
+      <p><strong>User Intention:</strong> Buttons keep the user's order, never duplicate on leaf focus, and clean themselves up on unload.</p>
+      <div class="anchor">Code Anchor: src/buttons.ts &rarr; ButtonInjector.syncButtons / injectHeaderButtons</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Action-Groups]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Organizes commands into named groups that drive chips, filters, and the quick palette's @group operator.</div>
+      <p><strong>User Intention:</strong> Renaming or deleting a group updates every assigned command, never orphaning them silently.</p>
+      <div class="anchor">Code Anchor: src/command-manager-ui.ts &rarr; CommandManagerUI.renderGroupsTab</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Backup-And-Restore]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Writes a JSON snapshot of all settings beside the plugin and can restore or import/export it.</div>
+      <p><strong>User Intention:</strong> Restoring is explicit, confirmed, and re-applies command state immediately.</p>
+      <div class="anchor">Code Anchor: src/main.ts &rarr; CommandPaletteManagerPlugin.saveBackupSnapshot / restoreFromBackupSnapshot</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Theme-Adaptive-Glassmorphism]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Adapts to the active Obsidian theme with optional custom accent and frosted-glass panels.</div>
+      <p><strong>User Intention:</strong> Contrast stays readable in light and dark themes; nothing hardcodes one color that clashes with themed accents.</p>
+      <div class="anchor">Code Anchor: src/main.ts &rarr; applyThemePreferences; styles.css &rarr; .cpm-glassmorphic</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: External-Config-Import]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Pulls hidden commands, macros, and pinned buttons from Commander and Better Command Palette.</div>
+      <p><strong>User Intention:</strong> Import is additive and de-duplicated; it never overwrites existing pins for the same command and location.</p>
+      <div class="anchor">Code Anchor: src/registry.ts &rarr; CommandRegistryService.importExternalConfigs</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[FEATURE: Inter-Plugin-Public-API]</span>
+        <span class="badge badge-agent">Active Feature</span>
+      </div>
+      <div class="summary">1-Line Summary: Lets other plugins open the manager, launch the palette, run commands and macros, and add aliases.</div>
+      <p><strong>User Intention:</strong> These methods stay stable because other plugins call them by ID.</p>
+      <div class="anchor">Code Anchor: src/main.ts &rarr; openManager / openQuickPalette / executeCommand / runMacro / addCommandAlias</div>
+    </div>
+  </section>
+
+  <section id="arch" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">System Flow &amp; Architecture Map</span>
+      </div>
+      <div class="summary">How the UI, persisted state, core services, and Obsidian APIs talk to each other.</div>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+flowchart TB
+    subgraph UI["User Interface"]
+        QP["QuickCommandPaletteModal"]
+        CM["CommandManagerUI (4 tabs)"]
+        ST["CommandManagerSettingTab"]
+        BTN["Injected buttons"]
+    end
+    subgraph STATE["Persisted State"]
+        DATA[("data.json")]
+        BACKUP[("backup.json")]
+    end
+    subgraph CORE["Core Services"]
+        REG["CommandRegistryService"]
+        MAC["MacroEngine"]
+        INJ["ButtonInjector"]
+    end
+    subgraph OBS["Obsidian API"]
+        CMD["app.commands"]
+        WS["app.workspace"]
+        HK["app.hotkeyManager"]
+        VAULT["app.vault.adapter"]
+    end
+    QP --> REG
+    CM --> REG
+    CM --> MAC
+    CM --> INJ
+    ST --> REG
+    REG --> CMD
+    REG --> HK
+    REG --> DATA
+    MAC --> REG
+    MAC --> WS
+    INJ --> WS
+    INJ --> CMD
+    DATA --> BACKUP
+    VAULT --> BACKUP
+    CMD -- interceptors --> REG
+        </pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Save &amp; Sync Loop</span>
+      </div>
+      <div class="summary">Every rename, alias, hide, star, group change or pin runs this loop.</div>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+sequenceDiagram
+    participant U as User
+    participant UI as CommandManagerUI
+    participant R as CommandRegistryService
+    participant A as app.commands
+    participant D as data.json
+
+    U->>UI: rename / alias / hide / star / group / pin
+    UI->>D: saveSettings()
+    UI->>R: scanAndSyncAll()
+    R->>A: snapshot unknown commands
+    R->>A: apply names + alias suffix
+    R->>R: detach hidden into hiddenBackup
+    R->>A: register cpm-alias:* proxies
+    R->>A: register plugin:macro-* commands
+    R-->>UI: getAllManagedCommands()
+        </pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Macro Execution Pipeline</span>
+      </div>
+      <div class="summary">Command steps re-enter the registry so hidden commands still run; text steps expand tokens first.</div>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+sequenceDiagram
+    participant E as MacroEngine
+    participant V as expandMacroVariables
+    participant R as CommandRegistryService
+    participant O as Obsidian
+
+    E->>E: reject re-entry, clamp loop 1..25
+    loop each step
+        alt command
+            E->>R: executeCommandSafe()
+            R->>O: executeCommandById()
+        else text / notice / clipboard / uri
+            E->>V: {{date}} {{prompt:...}}
+            V-->>E: resolved string
+        end
+        E->>O: await setTimeout(delayMs)
+    end
+        </pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="decisions" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[DECISION: Interceptors-Over-Command-Deletion]</span>
+        <span class="badge badge-human">DECIDED BY: HUMAN</span>
+      </div>
+      <div class="summary">1-Line Summary: Hiding a command moves it to a backup map instead of deleting it, with wrappers keeping hotkeys and API calls alive.</div>
+      <p><strong>Why We Pivoted:</strong> Deleting from <code>app.commands.commands</code> broke every bound hotkey because the hotkey manager reads that exact table. The backup map plus <code>executeCommandById</code>/<code>findCommand</code> interceptors keeps palettes clean without breaking execution.</p>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+flowchart LR
+    subgraph Failed["❌ What We Tried (Failed)"]
+        A[delete commands id] --> B[Hotkeys + plugin calls fail]
+    end
+    subgraph Active["✅ Current Solution (Works)"]
+        C[Move into hiddenBackup] --> D[Palettes filter it out]
+        D --> E[Re-mount for one execution]
+    end
+        </pre>
+      </div>
+      <div class="anchor">Code Anchor: src/registry.ts &rarr; installCommandInterceptors / syncOverrides</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[DECISION: Context-Aware-Alias-Proxies]</span>
+        <span class="badge badge-human">DECIDED BY: HUMAN</span>
+      </div>
+      <div class="summary">1-Line Summary: Alias commands forward checkCallback/editorCheckCallback instead of using a plain callback.</div>
+      <p><strong>Why We Pivoted:</strong> Static callbacks made editor-only aliases appear in PDF, Canvas and Graph views, then throw when invoked. Forwarding the target's own guard hides them exactly when the target itself would be unavailable.</p>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+flowchart LR
+    subgraph Failed["❌ What We Tried (Failed)"]
+        A[Static callback alias] --> B[Listed everywhere]
+        B --> C[Throws without editor]
+    end
+    subgraph Active["✅ Current Solution (Works)"]
+        D[checkCallback proxy] --> E[Queries target guard]
+        E --> F[Hidden when unavailable]
+    end
+        </pre>
+      </div>
+      <div class="anchor">Code Anchor: src/registry.ts &rarr; registerAliasProxyCommand</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[DECISION: Single-Header-Actions-Container]</span>
+        <span class="badge badge-human">DECIDED BY: HUMAN</span>
+      </div>
+      <div class="summary">1-Line Summary: Header buttons live in one reconciled container per leaf, fixing inverted order and flashing.</div>
+      <p><strong>Why We Pivoted:</strong> Removing and prepending individual buttons reversed their order and flashed on every tab switch. One container, emptied and refilled in user order, is stable.</p>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+flowchart LR
+    subgraph Failed["❌ What We Tried (Failed)"]
+        A[Remove each button] --> B[Prepend one by one]
+        B --> C[Inverted order + flash]
+    end
+    subgraph Active["✅ Current Solution (Works)"]
+        D[One container per leaf] --> E[Empty then append in order]
+    end
+        </pre>
+      </div>
+      <div class="anchor">Code Anchor: src/buttons.ts &rarr; injectHeaderButtons</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[DECISION: Ribbon-Item-Deregistration]</span>
+        <span class="badge badge-human">DECIDED BY: HUMAN</span>
+      </div>
+      <div class="summary">1-Line Summary: Removing a ribbon element also removes it from the workspace's internal ribbon item list.</div>
+      <p><strong>Why We Pivoted:</strong> <code>el.remove()</code> detached the DOM node but <code>leftRibbon.items</code> kept stale references, so repeated saves accumulated duplicate ribbon entries in memory.</p>
+      <div class="anchor">Code Anchor: src/buttons.ts &rarr; clearInjectedButtons</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[DECISION: Expand-Render-Limit-On-Range-Select]</span>
+        <span class="badge badge-human">DECIDED BY: HUMAN</span>
+      </div>
+      <div class="summary">1-Line Summary: Shift-range selection raises the render limit past the last selected item so the viewport never collapses.</div>
+      <p><strong>Why We Pivoted:</strong> Re-rendering clamped at 60 rows made items 61+ vanish while the scroll position stayed down, so the user's selection appeared to disappear.</p>
+      <div class="anchor">Code Anchor: src/command-manager-ui.ts &rarr; buildCommandItem (checkbox handler)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[DECISION: Theme-Variable-Inheritance]</span>
+        <span class="badge badge-human">DECIDED BY: HUMAN</span>
+      </div>
+      <div class="summary">1-Line Summary: Colors come from Obsidian CSS variables with an optional custom accent, replacing a hardcoded emerald palette.</div>
+      <p><strong>Why We Pivoted:</strong> The hardcoded <code>#00a884</code> broke contrast in light themes and clashed with purple, blue or red community accents. Inheriting theme variables keeps native readability.</p>
+      <div class="anchor">Code Anchor: src/command-manager-ui.ts &rarr; render; styles.css &rarr; .cpm-root</div>
+    </div>
+  </section>
+
+  <section id="traps" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[TRAP: Never-Permanently-Delete-Commands]</span>
+        <span class="badge badge-trap">DO NOT TOUCH</span>
+      </div>
+      <div class="summary">Strict Rule: NEVER remove a command permanently; stash it in hiddenBackup instead.</div>
+      <p><strong>What Breaks If You Touch It:</strong> Obsidian's hotkey manager and other plugins read the same command table, so every bound shortcut and integration call fails until the plugin is re-enabled.</p>
+      <div class="anchor">Protected Anchor: src/registry.ts &rarr; installCommandInterceptors / syncOverrides</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[TRAP: Header-DOM-Recreated-On-Leaf-Focus]</span>
+        <span class="badge badge-trap">DO NOT TOUCH</span>
+      </div>
+      <div class="summary">Strict Rule: NEVER prepend individual header buttons; rebuild the single .cpm-header-actions-group container.</div>
+      <p><strong>What Breaks If You Touch It:</strong> Obsidian recreates leaf chrome on focus; per-button injection both duplicates entries and reverses their order, and the bug looks like a styling glitch.</p>
+      <div class="anchor">Protected Anchor: src/buttons.ts &rarr; injectHeaderButtons</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[TRAP: Macro-Delay-Busy-Wait]</span>
+        <span class="badge badge-trap">DO NOT TOUCH</span>
+      </div>
+      <div class="summary">Strict Rule: NEVER implement a macro delay with a synchronous wait loop.</div>
+      <p><strong>What Breaks If You Touch It:</strong> Obsidian runs on a single renderer thread; a busy-wait blocks painting and input, so the app appears hung and may be flagged unresponsive.</p>
+      <div class="anchor">Protected Anchor: src/macro-engine.ts &rarr; MacroEngine.runMacro (delay handling)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[TRAP: Alias-Slug-Collisions]</span>
+        <span class="badge badge-trap">DO NOT TOUCH</span>
+      </div>
+      <div class="summary">Strict Rule: NEVER change the proxy ID scheme without handling collisions.</div>
+      <p><strong>What Breaks If You Touch It:</strong> Proxy IDs strip everything except a-z, 0-9, _ and -, so <code>my:alias</code> and <code>my-alias</code> collapse into one command and the user silently loses an alias.</p>
+      <div class="anchor">Protected Anchor: src/registry.ts &rarr; syncAliases</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[TRAP: Live-Vault-Is-Read-Only]</span>
+        <span class="badge badge-trap">DO NOT TOUCH</span>
+      </div>
+      <div class="summary">Strict Rule: NEVER write to Nihon/.obsidian/plugins/**.</div>
+      <p><strong>What Breaks If You Touch It:</strong> The live bundle is the only authoritative reference for unported behavior; mutating it destroys the reference and can break the user's daily workflow.</p>
+      <div class="anchor">Protected Anchor: runtime/main.js and the mirrored vault files</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">[TRAP: Settings-Key-Compatibility]</span>
+        <span class="badge badge-trap">DO NOT TOUCH</span>
+      </div>
+      <div class="summary">Strict Rule: NEVER rename or restructure a DEFAULT_SETTINGS key without a migration.</div>
+      <p><strong>What Breaks If You Touch It:</strong> Settings load through Object.assign(defaults, loaded); a renamed key silently falls back to its default, wiping aliases or pins with no warning.</p>
+      <div class="anchor">Protected Anchor: src/settings.ts &rarr; DEFAULT_SETTINGS; src/main.ts &rarr; loadSettings</div>
+    </div>
+  </section>
+
+  <script>
+    function showTab(id, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>
