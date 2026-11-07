@@ -5,7 +5,7 @@ export function debounce<T extends (...args: unknown[]) => void>(fn: T, waitMs =
   let timer: number | null = null;
   const debounced = ((...args: unknown[]) => {
     if (timer) window.clearTimeout(timer);
-    timer = window.setTimeout(() => fn.apply(null, args), waitMs);
+    timer = window.setTimeout(() => fn(...args), waitMs);
   }) as T;
   return debounced;
 }
