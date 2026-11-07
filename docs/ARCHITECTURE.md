@@ -60,7 +60,6 @@ flowchart TB
 ## 3. Core Subsystems & Engineering Tricks
 
 ### [SUBSYSTEM: Command-Registry-And-Overrides] | Aliases: registry, rename, hide, alias proxy, interceptors
-
 > **1-Line Summary:** Keeps an immutable snapshot of every command, then applies renames, hides, and alias proxies while protecting native hotkey execution.
 
 * **How It Works (Plain English):** On layout ready the registry walks `app.commands.commands` once and stores each command's original name, icon, and source plugin. It then installs three wrappers (`executeCommandById`, `findCommand`, `listCommands`). Hidden commands are moved into a backup map and re-mounted only for the duration of an execution, so hotkeys keep working while palettes stop listing them. Renames are written directly onto the live command object; aliases become separate `cpm-alias:*` commands whose `checkCallback` forwards to the real command.
@@ -88,7 +87,6 @@ sequenceDiagram
   * `src/registry.ts` -> `CommandRegistryService.getAllManagedCommands`, `executeCommandSafe`, `revertCommand`
 
 ### [SUBSYSTEM: Scored-Fuzzy-Launcher] | Aliases: quick palette, fuzzy scoring, match highlight, prefix operators
-
 > **1-Line Summary:** Scores commands against the query with five ranked strategies and renders highlighted matches with full keyboard control.
 
 * **How It Works (Plain English):** `fuzzyScore` returns a numeric score plus the character indices that matched. The palette keeps the best score per command (name, alias with a bonus, plugin name at a discount), sorts pinned first, then by score, then by the user's chosen secondary sort, and renders the top 90 rows. Prefix characters change the filter instead of the query: `@` group, `#` plugin, `!` macro, `*` pinned.
@@ -117,7 +115,6 @@ sequenceDiagram
   * `src/fuzzy.ts` -> `fuzzyScore`, `renderHighlightedText`, `debounce`
 
 ### [SUBSYSTEM: Macro-Execution-Pipeline] | Aliases: macro, steps, variables, prompt, clipboard, uri
-
 > **1-Line Summary:** Runs macro steps in order, expands template variables per step, and awaits delays so Obsidian never blocks.
 
 * **How It Works (Plain English):** A macro is an ordered list of typed steps with an optional per-step delay and a loop count clamped to 1–25. Command steps call back into the registry (so hidden commands still run). Text-bearing steps pass through `expandMacroVariables`, which fills date/time tokens, active note metadata, selection, clipboard, a generated UUID, and blocks on a modal for every `{{prompt:Label}}`. URIs are validated against an allowlist before `window.open`.
@@ -155,7 +152,6 @@ sequenceDiagram
   * `src/fuzzy.ts` -> `validateSafeUri`
 
 ### [SUBSYSTEM: UI-Button-Injection] | Aliases: header buttons, ribbon, status bar, context menu, pin
-
 > **1-Line Summary:** Renders pinned commands into five surfaces and reconciles them without duplicating DOM nodes.
 
 * **How It Works (Plain English):** Ribbon and status-bar buttons are created through the plugin API and tracked so they can be removed. Header buttons are written into one `.cpm-header-actions-group` container per leaf, which is emptied and rebuilt when the layout changes — never by prepending individual buttons, which used to invert their order. Context menus add a separator plus one item per matching pin.
@@ -182,7 +178,6 @@ sequenceDiagram
   * `src/modals.ts` -> `VisualIconPickerModal`
 
 ### [SUBSYSTEM: Management-UI-State] | Aliases: tabs, bulk bar, grouping, selection, infinite scroll, card style
-
 > **1-Line Summary:** One controller renders four tabs, filters, multi-select, grouped sections, and chunked scrolling over the same managed-command list.
 
 * **How It Works (Plain English):** `CommandManagerUI` holds all transient view state (active tab, search text, plugin/group/status filters, selected IDs, collapsed sections, render limit). Every mutation saves settings, re-runs the registry sync, refreshes injected buttons, then re-renders the current tab. Selection supports shift-range with an expanded render limit so the viewport never collapses under the user's cursor.
@@ -211,7 +206,6 @@ sequenceDiagram
 ## 4. Verification & Health Checks
 
 ### [VERIFY: Build-Typecheck-And-Lint] | Aliases: test command, build check, proof nothing broke, CI
-
 > **1-Line Summary:** The exact commands an AI or human must run before claiming a change is complete.
 
 * **Type Check:** `npx tsc -noEmit -skipLibCheck`
