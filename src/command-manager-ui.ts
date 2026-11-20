@@ -7,6 +7,7 @@ import {
 	VisualIconPickerModal,
 } from "./modals";
 import { voidAsync } from "./async";
+import { debounce } from "./fuzzy";
 import {
 	DEFAULT_ACTION_GROUPS,
 	DEFAULT_SETTINGS,
@@ -609,7 +610,7 @@ export class CommandManagerUI {
 			}
 		});
 
-		const debouncedSearch = debounceInput(() => {
+		const debouncedSearch = debounce(() => {
 			this.searchQuery = searchInput.value;
 			this.renderLimit = 70;
 			this.renderListRows(listViewport, this.registry.getAllManagedCommands());
@@ -1379,6 +1380,7 @@ export class CommandManagerUI {
 			[
 				{ id: "icon", label: "Icon Only" },
 				{ id: "both", label: "Icon + Label" },
+				{ id: "text", label: "Label Only" },
 			].forEach((m) => {
 				const opt = modePicker.createEl("option", { text: m.label, value: m.id });
 				opt.selected = (btn.displayMode || "icon") === m.id;
@@ -1785,11 +1787,4 @@ export class CommandManagerModal extends Modal {
 	}
 }
 
-/** Local debounce for input listeners; avoids exporting the fuzzy helper's generics. */
-function debounceInput(fn: () => void, waitMs: number): () => void {
-	let timer: number | null = null;
-	return () => {
-		if (timer) window.clearTimeout(timer);
-		timer = window.setTimeout(fn, waitMs);
-	};
-}
+

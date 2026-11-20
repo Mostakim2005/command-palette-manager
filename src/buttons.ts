@@ -41,11 +41,14 @@ export class ButtonInjector {
 			} else if (btn.location === "statusbar") {
 				const item = this.plugin.addStatusBarItem();
 				item.addClass("cpm-statusbar-btn");
-				const iconSpan = item.createSpan({ cls: "cpm-svg" });
-				setIcon(iconSpan, btn.icon || "terminal");
-				if (btn.color) iconSpan.style.color = btn.color;
-				if (btn.displayMode === "both" && btn.label) {
-					item.createSpan({ cls: "cpm-statusbar-label", text: btn.label });
+				if (btn.displayMode !== "text") {
+					const iconSpan = item.createSpan({ cls: "cpm-svg" });
+					setIcon(iconSpan, btn.icon || "terminal");
+					if (btn.color) iconSpan.style.color = btn.color;
+				}
+				if ((btn.displayMode === "both" || btn.displayMode === "text") && (btn.label || btn.commandId)) {
+					const labelSpan = item.createSpan({ cls: "cpm-statusbar-label", text: btn.label || btn.commandId });
+					if (btn.displayMode === "text" && btn.color) labelSpan.style.color = btn.color;
 				}
 				setTooltip(item, btn.tooltip || btn.label || btn.commandId);
 				item.addEventListener("click", () => {
@@ -88,12 +91,14 @@ export class ButtonInjector {
 				const btnEl = container.createEl("button", {
 					cls: "clickable-icon view-action cpm-header-btn",
 				});
-				const iconSpan = btnEl.createSpan({ cls: "cpm-svg" });
-				setIcon(iconSpan, btn.icon || "terminal");
-				if (btn.color) iconSpan.style.color = btn.color;
-
-				if (btn.displayMode === "both" && btn.label) {
-					btnEl.createSpan({ cls: "cpm-header-btn-label", text: btn.label });
+				if (btn.displayMode !== "text") {
+					const iconSpan = btnEl.createSpan({ cls: "cpm-svg" });
+					setIcon(iconSpan, btn.icon || "terminal");
+					if (btn.color) iconSpan.style.color = btn.color;
+				}
+				if ((btn.displayMode === "both" || btn.displayMode === "text") && (btn.label || btn.commandId)) {
+					const labelSpan = btnEl.createSpan({ cls: "cpm-header-btn-label", text: btn.label || btn.commandId });
+					if (btn.displayMode === "text" && btn.color) labelSpan.style.color = btn.color;
 				}
 
 				setTooltip(btnEl, btn.tooltip || btn.label || btn.commandId);

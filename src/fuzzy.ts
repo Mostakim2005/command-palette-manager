@@ -1,4 +1,4 @@
-﻿// Faithful Raycast-style fuzzy match + helpers from Nihon 1.2.0 (L221-345)
+// Faithful Raycast-style fuzzy match + helpers from Nihon 1.2.0 (L221-345)
 import type { FuzzyResult } from "./types";
 
 export function debounce<T extends (...args: unknown[]) => void>(fn: T, waitMs = 120): T {

@@ -1,4 +1,4 @@
-﻿{
+{
 	"name": "command-palette-manager",
 	"version": "1.2.0",
 	"description": "Visual command palette manager: aliases, rename/revert, hide, groups, macros, Raycast-style search.",
