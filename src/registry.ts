@@ -35,9 +35,18 @@ export class CommandRegistryService {
 	origListCommands?: () => InternalCommand[];
 	origFindCommand?: (id: string) => InternalCommand | null | undefined;
 
-	debouncedSaveUsageStats = debounce(() => {
-		void this.plugin.saveData(this.plugin.settings);
-	}, 1200);
+	private usageSaveTimer: number | null = null;
+	private usageDirty = false;
+
+	scheduleSaveUsageStats(): void {
+		this.usageDirty = true;
+		if (this.usageSaveTimer !== null) window.clearTimeout(this.usageSaveTimer);
+		this.usageSaveTimer = window.setTimeout(() => {
+			this.usageSaveTimer = null;
+			this.usageDirty = false;
+			void this.plugin.saveData(this.plugin.settings);
+		}, 1200);
+	}
 
 	constructor(
 		public app: App,
@@ -459,11 +468,15 @@ export class CommandRegistryService {
 			if (!override || !Array.isArray(override.aliases)) continue;
 			const snap = this.originalSnapshot.get(targetId);
 
-			override.aliases.forEach((alias) => {
+			override.aliases.forEach((alias, idx) => {
 				const clean = alias.trim();
 				if (!clean) return;
-				const slug = clean.toLowerCase().replace(/[^a-z0-9_-]/g, "-");
-				const fullProxyId = `cpm-alias:${targetId.replace(/[:\s]/g, "-")}:${slug}`;
+				const baseSlug = clean.toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/^-+|-+$/g, "");
+				const slug = baseSlug || `u${idx}`;
+				let fullProxyId = `cpm-alias:${targetId.replace(/[:\s]/g, "-")}:${slug}`;
+				if (this.registeredProxyIds.has(fullProxyId)) {
+					fullProxyId = `${fullProxyId}-${idx}`;
+				}
 				const displayName = this.formatAliasDisplayName(targetId, clean);
 
 				this.registerAliasProxyCommand(
@@ -497,11 +510,15 @@ export class CommandRegistryService {
 			});
 			this.registeredMacroIds.add(fullId);
 
-			(macro.aliases || []).forEach((alias) => {
+			(macro.aliases || []).forEach((alias, idx) => {
 				const clean = alias.trim();
 				if (!clean) return;
-				const slug = clean.toLowerCase().replace(/[^a-z0-9_-]/g, "-");
-				const aliasFullId = `cpm-alias:macro-${macro.id}:${slug}`;
+				const baseSlug = clean.toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/^-+|-+$/g, "");
+				const slug = baseSlug || `u${idx}`;
+				let aliasFullId = `cpm-alias:macro-${macro.id}:${slug}`;
+				if (this.registeredMacroIds.has(aliasFullId)) {
+					aliasFullId = `${aliasFullId}-${idx}`;
+				}
 				const aliasDisplay =
 					this.settings.aliasPrefixMode === "none"
 						? clean
@@ -538,7 +555,7 @@ export class CommandRegistryService {
 			...this.settings.recentCommandIds.filter((id) => id !== cmdId),
 		].slice(0, 30);
 
-		this.debouncedSaveUsageStats();
+		this.scheduleSaveUsageStats();
 	}
 
 	executeCommandSafe(cmdId: string): boolean {
@@ -559,12 +576,15 @@ export class CommandRegistryService {
 			api.executeCommandById ? api.executeCommandById(cmdId) : false;
 
 		if (liveCommands[cmdId]) {
-			this.recordCommandUsage(cmdId);
+			if (!this.interceptorsInstalled) this.recordCommandUsage(cmdId);
 			return execute();
 		}
 
 		const hiddenCmd = this.hiddenBackup.get(cmdId);
 		if (hiddenCmd) {
+			if (this.interceptorsInstalled) {
+				return execute();
+			}
 			liveCommands[cmdId] = hiddenCmd;
 			try {
 				this.recordCommandUsage(cmdId);
@@ -657,8 +677,14 @@ export class CommandRegistryService {
 		}
 		this.registeredMacroIds.clear();
 
-		// Flush any pending debounced usage stats.
-		void this.plugin.saveData(this.settings);
+		if (this.usageSaveTimer !== null) {
+			window.clearTimeout(this.usageSaveTimer);
+			this.usageSaveTimer = null;
+		}
+		if (this.usageDirty) {
+			this.usageDirty = false;
+			void this.plugin.saveData(this.settings);
+		}
 	}
 
 	importExternalConfigs(): number {

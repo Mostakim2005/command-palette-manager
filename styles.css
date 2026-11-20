@@ -4,8 +4,8 @@
 .cpm-root {
   --cpm-accent: var(--interactive-accent, #00a884);
   --cpm-accent-hover: var(--interactive-accent-hover, #008f70);
-  --cpm-accent-tonal: var(--interactive-accent-soft, rgba(var(--interactive-accent-rgb, 0, 168, 132), 0.12));
-  --cpm-accent-border: var(--interactive-accent-border, rgba(var(--interactive-accent-rgb, 0, 168, 132), 0.32));
+  --cpm-accent-tonal: color-mix(in srgb, var(--cpm-accent) 13%, transparent);
+  --cpm-accent-border: color-mix(in srgb, var(--cpm-accent) 34%, transparent);
   --cpm-warn: var(--text-warning, #f57c00);
   --cpm-warn-tonal: rgba(245, 124, 0, 0.14);
   --cpm-danger: var(--text-error, #d93025);
@@ -168,7 +168,7 @@ body:not(.cpm-glassmorphic) .cpm-assign-modal {
 .cpm-nav-pill.is-active {
   background: var(--cpm-accent) !important;
   border-color: var(--cpm-accent) !important;
-  color: #ffffff !important;
+  color: var(--text-on-accent, #ffffff) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
 }
 
@@ -337,7 +337,7 @@ body:not(.cpm-glassmorphic) .cpm-assign-modal {
 .cpm-chip.is-active {
   background: var(--cpm-accent) !important;
   border-color: var(--cpm-accent) !important;
-  color: #ffffff !important;
+  color: var(--text-on-accent, #ffffff) !important;
 }
 
 .cpm-chip.is-add-chip {
@@ -435,7 +435,7 @@ body:not(.cpm-glassmorphic) .cpm-assign-modal {
 .cpm-btn.is-primary {
   background: var(--cpm-accent) !important;
   border-color: var(--cpm-accent) !important;
-  color: #ffffff !important;
+  color: var(--text-on-accent, #ffffff) !important;
 }
 
 .cpm-btn.is-tonal {

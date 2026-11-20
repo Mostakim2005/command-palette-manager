@@ -57,7 +57,7 @@ export class MacroEngine {
 						const expanded = await expandMacroVariables(step.text, this.app);
 						const safeUri = validateSafeUri(expanded);
 						if (safeUri) {
-							window.open(safeUri);
+							window.open(safeUri, "_blank", "noopener,noreferrer");
 						} else {
 							new Notice(
 								`CPM Security: Blocked unsafe or unverified URI scheme "${expanded}"`,

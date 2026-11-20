@@ -1584,6 +1584,7 @@ export class CommandManagerUI {
 			{ id: "notice", label: "Step: Toast Notification" },
 			{ id: "clipboard", label: "Step: Copy to Clipboard" },
 			{ id: "uri", label: "Step: Open URL / URI" },
+			{ id: "delay", label: "Step: Wait / Delay Only" },
 		].forEach((t) => {
 			const opt = typeSelect.createEl("option", { text: t.label, value: t.id });
 			opt.selected = this.newStepType === t.id;
@@ -1606,7 +1607,7 @@ export class CommandManagerUI {
 					value: c.id,
 				});
 			});
-		} else {
+		} else if (this.newStepType !== "delay") {
 			const placeholder =
 				this.newStepType === "text"
 					? "Text to insert (supports {{date}}, {{time}}, {{title}}, {{selection}})..."
@@ -1643,6 +1644,14 @@ export class CommandManagerUI {
 					commandId: stepCmdSelect.value,
 					text: "",
 					delayMs: Math.max(0, Number(delayIn.value) || 0),
+				});
+			} else if (this.newStepType === "delay") {
+				const waitMs = Math.max(10, Number(delayIn.value) || 200);
+				activeMacro.steps.push({
+					type: "delay",
+					commandId: "",
+					text: "",
+					delayMs: waitMs,
 				});
 			} else {
 				if (!stepTextInput?.value) {

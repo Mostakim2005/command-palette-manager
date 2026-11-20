@@ -21,7 +21,7 @@ export class CommandManagerSettingTab extends PluginSettingTab {
 		const heroIcon = heroLeft.createSpan({ cls: "cpm-hero-icon" });
 		setIcon(heroIcon, "command");
 		const heroText = heroLeft.createDiv();
-		new Setting(heroText).setName("Command palette manager").setHeading();
+		new Setting(heroText).setName("Quick launcher & command management").setHeading();
 		heroText.createEl("p", {
 			text: "Visual command manager: add multiple aliases to any plugin command, rename & revert, hide commands, group by action, pin UI buttons, and build macros.",
 		});

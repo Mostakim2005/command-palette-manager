@@ -53,14 +53,16 @@ export async function expandMacroVariables(text: string, app: App): Promise<stri
 		.replace(/\{\{clipboard\}\}/gi, clipboardText)
 		.replace(
 			/\{\{uuid\}\}/gi,
-			Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+			() => Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
 		);
 
-	// Interactive {{prompt:Prompt Label}} — each occurrence blocks until the user answers.
+	// Interactive {{prompt:Prompt Label}} — collect spans first so user input never shifts offsets or re-triggers prompts.
 	const promptPattern = /\{\{prompt:([^}]+)\}\}/gi;
+	const parts: string[] = [];
+	let lastIdx = 0;
 	let match: RegExpExecArray | null;
 	while ((match = promptPattern.exec(processed)) !== null) {
-		const fullMatch = match[0];
+		parts.push(processed.slice(lastIdx, match.index));
 		const promptLabel = match[1] ?? "";
 		const modal = new TextPromptModal(app, promptLabel);
 		modal.open();
@@ -68,7 +70,10 @@ export async function expandMacroVariables(text: string, app: App): Promise<stri
 		if (userInput === null) {
 			throw new Error("Macro aborted by user");
 		}
-		processed = processed.replace(fullMatch, userInput);
+		parts.push(userInput);
+		lastIdx = match.index + match[0].length;
 	}
+	parts.push(processed.slice(lastIdx));
+	processed = parts.join("");
 	return processed;
 }

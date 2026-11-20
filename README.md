@@ -12,7 +12,7 @@ Visual command palette manager: add multiple aliases to any plugin command, rena
 | [`docs/PRODUCT.md`](docs/PRODUCT.md) | What the plugin must do, feature by feature, with code anchors. |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Mermaid system map, subsystem mechanics, verification commands, extension recipes. |
 | [`docs/DECISIONS_AND_TRAPS.md`](docs/DECISIONS_AND_TRAPS.md) | Why each non-obvious mechanism exists and what must never be changed. |
-| [`docs/VISUAL_GUIDE.html`](docs/VISUAL_GUIDE.html) | Self-contained browser dashboard of intent, architecture, decisions and landmines. |
+| [`preview/visual-guide.html`](preview/visual-guide.html) | Self-contained browser dashboard of intent, architecture, decisions and landmines. |
 | [`AGENTS.md`](AGENTS.md) | Repository-specific build commands, layout and traps. |
 
 ## Source layout
