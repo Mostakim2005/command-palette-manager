@@ -205,7 +205,7 @@ sequenceDiagram
 
 ## 4. Verification & Health Checks
 
-### [VERIFY: Build-Typecheck-And-Lint] | Aliases: test command, build check, proof nothing broke, CI
+### [SUBSYSTEM: Verification-And-Build-Gate] | Aliases: test command, build check, proof nothing broke, CI
 > **1-Line Summary:** The exact commands an AI or human must run before claiming a change is complete.
 
 * **Type Check:** `npx tsc -noEmit -skipLibCheck`
