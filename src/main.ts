@@ -57,9 +57,10 @@ export default class CommandPaletteManagerPlugin extends Plugin {
 			},
 		});
 
-		this.addRibbonIcon("command", "Command Palette Manager", () => {
+		const ribbonEl = this.addRibbonIcon("command", "Command Palette Manager", () => {
 			this.openManager();
 		});
+		ribbonEl.setAttribute("aria-label", "Open Command Palette Manager");
 
 		this.app.workspace.onLayoutReady(() => {
 			this.registry.scanAndSyncAll();

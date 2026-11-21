@@ -118,3 +118,9 @@
 > **1-Line Summary:** Assign a hotkey directly from the command card instead of jumping to Obsidian's hotkey settings.
 * **User Intention:** Keep the user in one screen while configuring a command end to end.
 * **Target Integration Point:** `src/registry.ts` -> `CommandRegistryService.openHotkeySettingsFor`.
+
+### [FEATURE: UI-UX-Parity-And-Accessibility] | Aliases: ribbon aria, focus visible, reduced motion, mobile touch
+> **1-Line Summary:** Enforces accessible ARIA attributes on ribbon buttons, high-contrast :focus-visible rings, prefers-reduced-motion compliance, and mobile touch target padding.
+* **User Intention (Non-Negotiable):** Ensure command palette controls are accessible via keyboard navigation, screen readers, and mobile touch viewports.
+* **Visual / UI Behavior:** Enhanced 2px primary focus outlines, smooth transitions suppressed when user prefers reduced motion, and 44px min-touch targets on mobile.
+* **Code Anchors (Grep Targets):** `src/main.ts`, `styles.css`

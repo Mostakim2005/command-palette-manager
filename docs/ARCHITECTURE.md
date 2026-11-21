@@ -236,3 +236,18 @@ sequenceDiagram
   1. Read the foreign settings defensively in `src/registry.ts` -> `CommandRegistryService.importExternalConfigs`.
   2. Only add entries that do not already exist, and increment `importedCount`.
   3. Call `scanAndSyncAll()` and `buttonInjector.syncButtons()` once at the end.
+
+### [SUBSYSTEM: UI-UX-Parity-And-Accessibility] | Aliases: status bar, ribbon icon, confirm modal, focus-visible, reduced-motion
+> **1-Line Summary:** Integrates native Obsidian workspace UI touchpoints (ribbon launcher, live status bar pill, modal confirmation guardrails) and WCAG AA accessibility styles.
+* **Architecture / Subsystem Role:** Standardizes the plugin surface across desktop and mobile Obsidian clients with keyboard accessibility, reduced-motion safety, and high-visibility status telemetry.
+* **Component Diagram:**
+```mermaid
+graph LR
+    subgraph UI_Parity["UI/UX Universal Baseline"]
+        Ribbon["Ribbon Icon Launcher"] --> Leaf["Workspace Leaf / Modal"]
+        StatusBar["Status Bar Pill"] --> Leaf
+        Modals["Destructive Actions"] --> Confirm["ConfirmModal Guardrail"]
+        CSS["Universal CSS"] --> A11y["Focus-Visible & Reduced Motion"]
+    end
+```
+* **Code Anchors (Grep Targets):** `src/main.ts`, `styles.css`
