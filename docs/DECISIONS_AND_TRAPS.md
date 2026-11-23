@@ -209,3 +209,9 @@ flowchart LR
 * **Decision Maker:** `[DECIDED BY: HUMAN]`
 * **Protected Code Anchors (Grep Targets):** `src/main.ts` -> `onload`, `settingsReady`
 
+
+### [DECISION: Absorb-Better-Command-Palette-Into-Quick-Palette] | Aliases: better command palette, file search, tag search, close on backspace
+> **1-Line Summary:** Absorbed Better Command Palette's file search (`/`), tag search (`##`), Shift+Enter note creation, Ctrl+Enter new-tab open, Close on Backspace, .md extension hiding, file exclusions, recent-above-pinned, and suggestion limit into `QuickCommandPaletteModal` so Better Command Palette can be retired.
+* **Decision Maker:** `[DECIDED BY: HUMAN]`
+* **Protected Code Anchors (Grep Targets):** `src/quick-palette.ts` -> `QuickCommandPaletteModal`, `src/settings-tab.ts`, `src/main.ts` -> `openQuickPalette`
+

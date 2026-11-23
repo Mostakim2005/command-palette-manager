@@ -217,4 +217,12 @@ export const DEFAULT_SETTINGS: CpmSettings = {
 	customAccentColor: "#00a884",
 	glassmorphism: true,
 	commandStats: {},
+	fileSearchPrefix: "/",
+	tagSearchPrefix: "##",
+	closeOnBackspace: true,
+	hideMdExtension: true,
+	fileTypeExclusions: [],
+	recentAbovePinned: false,
+	suggestionLimit: 90,
+	createAndOpenModifiers: true,
 };

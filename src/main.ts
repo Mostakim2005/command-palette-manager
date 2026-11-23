@@ -4,7 +4,7 @@ import { CommandRegistryService } from "./registry";
 import { MacroEngine } from "./macro-engine";
 import { ButtonInjector } from "./buttons";
 import { CommandManagerModal } from "./command-manager-ui";
-import { QuickCommandPaletteModal } from "./quick-palette";
+import { QuickCommandPaletteModal, type QuickPaletteMode } from "./quick-palette";
 import { CommandManagerSettingTab } from "./settings-tab";
 import type { CpmSettings, ManagedCommand } from "./types";
 
@@ -60,8 +60,26 @@ export default class CommandPaletteManagerPlugin extends Plugin {
 						this.openManager();
 						return;
 					}
-					this.openQuickPalette();
+					this.openQuickPalette("command");
 				});
+			},
+		});
+
+		this.addCommand({
+			id: "open-quick-file-search",
+			name: "Open Quick Palette: File Search",
+			icon: "file-text",
+			callback: () => {
+				this.openQuickPalette("file");
+			},
+		});
+
+		this.addCommand({
+			id: "open-quick-tag-search",
+			name: "Open Quick Palette: Tag Search",
+			icon: "tag",
+			callback: () => {
+				this.openQuickPalette("tag");
 			},
 		});
 
@@ -108,9 +126,9 @@ export default class CommandPaletteManagerPlugin extends Plugin {
 		});
 	}
 
-	openQuickPalette(): void {
+	openQuickPalette(mode: QuickPaletteMode = "command"): void {
 		void this.settingsReady.then(() => {
-			new QuickCommandPaletteModal(this.app, this).open();
+			new QuickCommandPaletteModal(this.app, this, mode).open();
 		});
 	}
 

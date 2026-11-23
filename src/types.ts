@@ -75,6 +75,14 @@ export interface CpmSettings {
 	customAccentColor: string;
 	glassmorphism: boolean;
 	commandStats: Record<string, CommandStat>;
+	fileSearchPrefix: string;
+	tagSearchPrefix: string;
+	closeOnBackspace: boolean;
+	hideMdExtension: boolean;
+	fileTypeExclusions: string[];
+	recentAbovePinned: boolean;
+	suggestionLimit: number;
+	createAndOpenModifiers: boolean;
 }
 
 export interface FuzzyResult {

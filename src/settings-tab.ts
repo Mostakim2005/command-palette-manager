@@ -242,5 +242,109 @@ export class CommandManagerSettingTab extends PluginSettingTab {
 					},
 				);
 			});
+
+		new Setting(prefBox).setName("Unified palette: file & tag search").setHeading();
+
+		new Setting(prefBox)
+			.setName("File search prefix")
+			.setDesc("Type this prefix in Quick Palette to search vault files (default: /).")
+			.addText((txt) => {
+				txt.setPlaceholder("/")
+					.setValue(this.plugin.settings.fileSearchPrefix ?? "/")
+					.onChange(async (val) => {
+						this.plugin.settings.fileSearchPrefix = val.trim() || "/";
+						await this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(prefBox)
+			.setName("Tag search prefix")
+			.setDesc("Type this prefix in Quick Palette to search tags and browse tagged notes (default: ##).")
+			.addText((txt) => {
+				txt.setPlaceholder("##")
+					.setValue(this.plugin.settings.tagSearchPrefix ?? "##")
+					.onChange(async (val) => {
+						this.plugin.settings.tagSearchPrefix = val.trim() || "##";
+						await this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(prefBox)
+			.setName("Close palette on Backspace when empty")
+			.setDesc("Pressing Backspace in an empty search box closes Quick Palette (or returns from a tag filter).")
+			.addToggle((tog) => {
+				tog.setValue(this.plugin.settings.closeOnBackspace !== false).onChange(
+					async (val) => {
+						this.plugin.settings.closeOnBackspace = val;
+						await this.plugin.saveSettings();
+					},
+				);
+			});
+
+		new Setting(prefBox)
+			.setName("Hide .md file extensions")
+			.setDesc("Display cleaner note titles without the trailing .md extension in File Search.")
+			.addToggle((tog) => {
+				tog.setValue(this.plugin.settings.hideMdExtension !== false).onChange(
+					async (val) => {
+						this.plugin.settings.hideMdExtension = val;
+						await this.plugin.saveSettings();
+					},
+				);
+			});
+
+		new Setting(prefBox)
+			.setName("Use Shift+Enter to create notes and Ctrl+Enter for new tab")
+			.setDesc("Enable Better Command Palette style keyboard modifiers in File Search.")
+			.addToggle((tog) => {
+				tog.setValue(this.plugin.settings.createAndOpenModifiers !== false).onChange(
+					async (val) => {
+						this.plugin.settings.createAndOpenModifiers = val;
+						await this.plugin.saveSettings();
+					},
+				);
+			});
+
+		new Setting(prefBox)
+			.setName("Show recent commands above pinned")
+			.setDesc("Prioritize recently executed commands above starred/pinned entries when query is empty.")
+			.addToggle((tog) => {
+				tog.setValue(Boolean(this.plugin.settings.recentAbovePinned)).onChange(
+					async (val) => {
+						this.plugin.settings.recentAbovePinned = val;
+						await this.plugin.saveSettings();
+					},
+				);
+			});
+
+		new Setting(prefBox)
+			.setName("Excluded file extensions")
+			.setDesc("Comma-separated extensions to hide from File Search (e.g. png, jpg, pdf).")
+			.addText((txt) => {
+				txt.setPlaceholder("png, jpg, webp")
+					.setValue((this.plugin.settings.fileTypeExclusions || []).join(", "))
+					.onChange(async (val) => {
+						this.plugin.settings.fileTypeExclusions = val
+							.split(",")
+							.map((s) => s.trim().replace(/^\./, ""))
+							.filter(Boolean);
+						await this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(prefBox)
+			.setName("Suggestion limit")
+			.setDesc("Maximum number of results rendered in Quick Palette (10–250).")
+			.addText((txt) => {
+				txt.setPlaceholder("90")
+					.setValue(String(this.plugin.settings.suggestionLimit || 90))
+					.onChange(async (val) => {
+						const n = Number.parseInt(val, 10);
+						if (Number.isFinite(n) && n >= 10 && n <= 250) {
+							this.plugin.settings.suggestionLimit = n;
+							await this.plugin.saveSettings();
+						}
+					});
+			});
 	}
 }
