@@ -203,3 +203,9 @@ flowchart LR
 * **Protected Code Anchors (Grep Targets):**
   * `src/settings.ts` -> `DEFAULT_SETTINGS`
   * `src/main.ts` -> `CommandPaletteManagerPlugin.loadSettings`
+
+### [DECISION: Non-Blocking-Startup-Hydration] | Aliases: startup latency, non-blocking onload, deferred settings
+> **1-Line Summary:** Hydrated 50+ KB data.json asynchronously via settingsReady so onload() returns immediately while guarding onLayoutReady, modal opens, and saves.
+* **Decision Maker:** `[DECIDED BY: HUMAN]`
+* **Protected Code Anchors (Grep Targets):** `src/main.ts` -> `onload`, `settingsReady`
+

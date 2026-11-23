@@ -13,10 +13,15 @@ import type { CpmSettings, ManagedCommand } from "./types";
  * Lifecycle only: settings, services, commands, ribbon and workspace wiring.
  */
 export default class CommandPaletteManagerPlugin extends Plugin {
-	settings!: CpmSettings;
+	settings: CpmSettings = {
+		...DEFAULT_SETTINGS,
+		actionGroups: [...DEFAULT_ACTION_GROUPS],
+		commandStats: {},
+	};
 	registry!: CommandRegistryService;
 	macroEngine!: MacroEngine;
 	buttonInjector!: ButtonInjector;
+	private settingsReady: Promise<void> = Promise.resolve();
 
 	applyThemePreferences(): void {
 		if (typeof document !== "undefined") {
@@ -24,9 +29,10 @@ export default class CommandPaletteManagerPlugin extends Plugin {
 		}
 	}
 
-	async onload(): Promise<void> {
-		await this.loadSettings();
-		this.applyThemePreferences();
+	onload(): void {
+		this.settingsReady = this.loadSettings().then(() => {
+			this.applyThemePreferences();
+		});
 
 		this.registry = new CommandRegistryService(this.app, this);
 		this.macroEngine = new MacroEngine(this.app, this);
@@ -46,14 +52,16 @@ export default class CommandPaletteManagerPlugin extends Plugin {
 			name: "Open Quick Command Palette (Aliases, Pinned & Groups)",
 			icon: "zap",
 			callback: () => {
-				if (!this.settings.enableQuickPalette) {
-					new Notice(
-						"Quick Command Palette is disabled in settings. Opening Manager instead.",
-					);
-					this.openManager();
-					return;
-				}
-				this.openQuickPalette();
+				void this.settingsReady.then(() => {
+					if (!this.settings.enableQuickPalette) {
+						new Notice(
+							"Quick Command Palette is disabled in settings. Opening Manager instead.",
+						);
+						this.openManager();
+						return;
+					}
+					this.openQuickPalette();
+				});
 			},
 		});
 
@@ -63,8 +71,10 @@ export default class CommandPaletteManagerPlugin extends Plugin {
 		ribbonEl.setAttribute("aria-label", "Open Command Palette Manager");
 
 		this.app.workspace.onLayoutReady(() => {
-			this.registry.scanAndSyncAll();
-			this.buttonInjector.syncButtons();
+			void this.settingsReady.then(() => {
+				this.registry.scanAndSyncAll();
+				this.buttonInjector.syncButtons();
+			});
 		});
 
 		this.registerEvent(
@@ -93,11 +103,15 @@ export default class CommandPaletteManagerPlugin extends Plugin {
 
 	// --- Public inter-plugin API ---
 	openManager(): void {
-		new CommandManagerModal(this.app, this).open();
+		void this.settingsReady.then(() => {
+			new CommandManagerModal(this.app, this).open();
+		});
 	}
 
 	openQuickPalette(): void {
-		new QuickCommandPaletteModal(this.app, this).open();
+		void this.settingsReady.then(() => {
+			new QuickCommandPaletteModal(this.app, this).open();
+		});
 	}
 
 	executeCommand(cmdId: string): boolean {
@@ -172,6 +186,7 @@ export default class CommandPaletteManagerPlugin extends Plugin {
 	}
 
 	async saveSettings(): Promise<void> {
+		await this.settingsReady;
 		await this.saveData(this.settings);
 		if (this.settings.autoBackupOnSave) {
 			await this.saveBackupSnapshot();
